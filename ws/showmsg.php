@@ -10,8 +10,9 @@ error_reporting(E_ALL);
 
 if (isset($_GET["id"]) && $_GET["id"] != "") {
     $id = $_GET["id"];
+    $id = $_GET["id"];
     try {
-        $sql = "SELECT pid,msg FROM mqtt WHERE id = ?";
+        $sql = "SELECT pid,topic,msg FROM mqtt WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('i', $id);
         $stmt->execute();
@@ -19,9 +20,14 @@ if (isset($_GET["id"]) && $_GET["id"] != "") {
         $row = $result->fetch_assoc();
         $pid = $row["pid"];
         $msg = $row["msg"];
+        $topic = $row["topic"];
+
 
         $list_result["status"] = "OK";
         $list_result["data"] = $msg;
+        $list_result["topic"] = $topic;
+        $list_result["pid"] = $pid;
+
 
         //=== Update ว่าอ่านแล้ว ===//
         $sql = "UPDATE mqtt SET unread='F',updatetime=CURRENT_TIMESTAMP() WHERE id = ?";
