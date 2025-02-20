@@ -12,8 +12,21 @@ $json = file_get_contents('php://input');
 $data = json_decode($json, true);
 
 if (json_last_error() === JSON_ERROR_NONE) {
-    $pid = $data["pid"];
-    $msg = $data["msg"];
+    if (isset($data["pid"])) {
+        $pid = $data["pid"];
+    } else {
+        $pid = "";
+    }
+    if (isset($data["msg"])) {
+        $msg = $data["msg"];
+    } else {
+        $msg = "";
+    }
+    if (isset($data["topic"])) {
+        $topic = $data["topic"];
+    } else {
+        $topic = "";
+    }
     if (isset($data["unread"])) {
         $unread = $data["unread"];
     } else {
@@ -28,16 +41,16 @@ if (json_last_error() === JSON_ERROR_NONE) {
     try {
         if ($id == "" || $id == null) {
             //=== Insert ===//
-            $sql = "INSERT INTO mqtt (pid,msg) VALUES (?,?)";
+            $sql = "INSERT INTO mqtt (pid,msg,topic) VALUES (?,?,?)";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param('ss', $pid, $msg);
+            $stmt->bind_param('sss', $pid, $msg, $topic);
             $message = "Insert Successfully";
         } else {
             //=== Update ===//
-            $sql = "UPDATE mqtt SET pid = ?, msg = ?,unread=?,updatetime=CURRENT_TIMESTAMP() WHERE id = ?";
+            $sql = "UPDATE mqtt SET unread='F',updatetime=CURRENT_TIMESTAMP() WHERE id = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param('sssi', $pid, $msg, $unread, $id);
-            $message = "Update Successfully, id = $id, pid = $pid, unread = $unread";
+            $stmt->bind_param('i',   $id);
+            $message = "Update READ Successfully, id = $id";
         }
 
         if ($stmt->execute()) {
